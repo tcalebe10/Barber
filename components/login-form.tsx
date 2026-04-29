@@ -40,7 +40,7 @@ export function LoginForm({
       });
       if (error) throw error;
       
-      router.push("/admin/dashboard");
+      router.push("/");
     } catch (error: unknown) {
       setError(error instanceof Error ? "Acesso negado. Credenciais inválidas." : "Erro ao conectar");
     } finally {
@@ -71,17 +71,17 @@ export function LoginForm({
           
           <div className="flex items-center gap-2 mb-2">
             <Scissors className="text-orange-500" size={20} />
-            <CardTitle className="text-xl font-bold text-white tracking-tight">Login Administrativo</CardTitle>
+            <CardTitle className="text-xl font-bold text-white tracking-tight">Login</CardTitle>
           </div>
           <CardDescription className="text-zinc-500 text-sm">
-            Área exclusiva para barbeiros e gerentes.
+            Acesse sua conta.
           </CardDescription>
         </CardHeader>
 
         <CardContent className="grid gap-4 pb-8">
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="grid gap-2">
-              <Label htmlFor="email" className="text-zinc-400 text-[10px] uppercase font-black tracking-widest">E-mail Profissional</Label>
+              <Label htmlFor="email" className="text-zinc-400 text-[10px] uppercase font-black tracking-widest">E-mail</Label>
               <Input
                 id="email"
                 type="email"
@@ -110,15 +110,15 @@ export function LoginForm({
               </div>
             )}
 
-            <Button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:opacity-90 text-white font-bold h-12 rounded-xl shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98]" 
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:opacity-90 text-white font-bold h-12 rounded-xl shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98]"
               disabled={isLoading}
             >
               {isLoading ? (
                 <Loader2 className="animate-spin text-white" size={20} />
               ) : (
-                "Entrar no Painel"
+                "Entrar"
               )}
             </Button>
           </form>
@@ -127,8 +127,13 @@ export function LoginForm({
 
       <div className="text-center">
         <p className="text-zinc-700 text-[10px] uppercase tracking-[0.4em] font-bold">
-          Acesso Restrito
+          Acesso
         </p>
+      </div>
+
+      <div className="text-center text-sm mt-2">
+        <span className="text-zinc-400">Não possui conta? </span>
+        <Link href="/auth/sign-up" className="text-orange-500 font-bold underline underline-offset-2">Cadastre-se</Link>
       </div>
     </div>
   );

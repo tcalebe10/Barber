@@ -18,16 +18,16 @@ export default function LoginPage() {
                 <Scissors className="text-orange-500" size={32} />
             </div>
             <h1 className="text-white text-2xl font-bold tracking-tight">BarberPro</h1>
-            <p className="text-zinc-500 text-xs uppercase tracking-[0.2em] mt-1">Painel Administrativo</p>
+            <p className="text-zinc-500 text-xs uppercase tracking-[0.2em] mt-1">Acesse sua conta</p>
         </div>
 
         {/* Chamada do componente que acabamos de ajustar */}
         <LoginForm />
         
         <div className="mt-12 text-center">
-            <p className="text-zinc-700 text-[10px] uppercase tracking-[0.3em] font-bold">
-                Acesso Restrito
-            </p>
+          <p className="text-zinc-700 text-[10px] uppercase tracking-[0.3em] font-bold">
+            Bem-vindo
+          </p>
         </div>
       </div>
     </div>

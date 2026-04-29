@@ -20,7 +20,7 @@ export default function HomePage() {
           className="flex items-center gap-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors bg-zinc-800/50 hover:bg-zinc-800 px-4 py-2 rounded-full border border-zinc-700/50"
         >
           <LogIn size={16} />
-          <span>Área do Barbeiro</span>
+          <span>Login</span>
         </Link>
       </nav>
 
@@ -67,7 +67,7 @@ export default function HomePage() {
         <div className="bg-[#1e1e24] p-8 rounded-2xl border border-zinc-800/50 text-center group hover:border-orange-500/30 transition-colors">
           <MapPin className="mx-auto text-orange-500 mb-4" size={32} />
           <h3 className="text-lg font-bold text-white mb-2">Localização</h3>
-          <p className="text-zinc-400 text-sm font-medium">Rua das Barbearias, 123<br/>Bairro Premium - Sua Cidade</p>
+          <p className="text-zinc-400 text-sm font-medium">Rua Santa Quitéria, 388<br/>Carlos Prates - Belo Horizonte</p>
         </div>
       </section>
 
