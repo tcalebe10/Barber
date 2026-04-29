@@ -22,6 +22,8 @@ export function SignUpForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState(""); // Novo campo
+  const [phone, setPhone] = useState(""); // Novo campo
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -35,23 +37,48 @@ export function SignUpForm({
     setError(null);
 
     if (password !== repeatPassword) {
-      setError("Passwords do not match");
+      setError("As senhas não coincidem");
       setIsLoading(false);
       return;
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // 1. Criar usuário no Auth do Supabase
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/protected`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
-      if (error) throw error;
-      router.push("/auth/login");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+
+      if (authError) throw authError;
+
+      // 2. Salvar Nome e Telefone usando UPSERT
+      // O upsert evita o erro de "duplicate key" pois ele atualiza se já existir
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .upsert({
+            id: authData.user.id,
+            full_name: fullName,
+            phone: phone,
+            role: "client",
+          }, { onConflict: 'id' });
+
+        if (profileError) throw profileError;
+      }
+
+      // 3. Sucesso!
+      router.push("/auth/login?message=Cadastro realizado! Verifique seu e-mail.");
+      
+    } catch (error: any) {
+      // Tratamento de erro amigável
+      if (error.message.includes("unique constraint")) {
+        setError("Este usuário já está cadastrado.");
+      } else {
+        setError(error.message || "Ocorreu um erro no cadastro");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -78,11 +105,39 @@ export function SignUpForm({
           <div className="flex items-center gap-2 mb-2">
             <CardTitle className="text-xl font-bold text-white tracking-tight">Criar Conta</CardTitle>
           </div>
-          <CardDescription className="text-zinc-500 text-sm">Preencha os dados para criar sua conta</CardDescription>
+          <CardDescription className="text-zinc-500 text-sm">Preencha seus dados profissionais</CardDescription>
         </CardHeader>
 
         <CardContent className="grid gap-4 pb-8">
-          <form onSubmit={handleSignUp} className="space-y-5">
+          <form onSubmit={handleSignUp} className="space-y-4">
+            
+            {/* NOME COMPLETO */}
+            <div className="grid gap-2">
+              <Label htmlFor="fullName" className="text-zinc-400 text-[10px] uppercase font-black tracking-widest">Nome Completo</Label>
+              <Input
+                id="fullName"
+                placeholder="Ex: Carlos Barbeiro"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="bg-zinc-950/50 border-zinc-800 text-white focus-visible:ring-orange-500 h-12 rounded-xl"
+              />
+            </div>
+
+            {/* TELEFONE */}
+            <div className="grid gap-2">
+              <Label htmlFor="phone" className="text-zinc-400 text-[10px] uppercase font-black tracking-widest">Telefone / WhatsApp</Label>
+              <Input
+                id="phone"
+                placeholder="(11) 99999-9999"
+                required
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="bg-zinc-950/50 border-zinc-800 text-white focus-visible:ring-orange-500 h-12 rounded-xl"
+              />
+            </div>
+
+            {/* EMAIL */}
             <div className="grid gap-2">
               <Label htmlFor="email" className="text-zinc-400 text-[10px] uppercase font-black tracking-widest">E-mail</Label>
               <Input
@@ -96,6 +151,7 @@ export function SignUpForm({
               />
             </div>
 
+            {/* SENHA */}
             <div className="grid gap-2">
               <Label htmlFor="password" className="text-zinc-400 text-[10px] uppercase font-black tracking-widest">Senha</Label>
               <Input
@@ -108,6 +164,7 @@ export function SignUpForm({
               />
             </div>
 
+            {/* REPETIR SENHA */}
             <div className="grid gap-2">
               <Label htmlFor="repeat-password" className="text-zinc-400 text-[10px] uppercase font-black tracking-widest">Repetir Senha</Label>
               <Input
@@ -125,7 +182,7 @@ export function SignUpForm({
             )}
 
             <Button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:opacity-90 text-white font-bold h-12 rounded-xl shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98]" disabled={isLoading}>
-              {isLoading ? "Criando conta..." : "Criar Conta"}
+              {isLoading ? "Processando..." : "Criar Conta"}
             </Button>
           </form>
         </CardContent>
