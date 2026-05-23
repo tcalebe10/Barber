@@ -63,6 +63,7 @@ export function SignUpForm({
             id: authData.user.id,
             full_name: fullName,
             phone: phone,
+            Email: email,
             role: "client",
           }, { onConflict: 'id' });
 

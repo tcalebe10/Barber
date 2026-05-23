@@ -34,13 +34,30 @@ export function LoginForm({
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error, data } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       if (error) throw error;
-      
-      router.push("/");
+
+      // Busca o role do usuário na tabela profiles
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", data.user.id)
+          .single();
+
+        // Redireciona baseado no role
+        if (profile?.role === "barber") {
+          router.push("/barber/dashboard");
+        } else if (profile?.role === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          // Cliente (padrão)
+          router.push("/");
+        }
+      }
     } catch (error: unknown) {
       setError(error instanceof Error ? "Acesso negado. Credenciais inválidas." : "Erro ao conectar");
     } finally {
