@@ -62,7 +62,7 @@ export function LoginForm({
               className="text-zinc-500 hover:text-white transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-wider bg-zinc-800/40 px-3 py-1.5 rounded-lg border border-zinc-700/50 hover:bg-zinc-800"
             >
               <ArrowLeft size={14} />
-              Voltar
+              Início
             </Link>
             <div className="text-orange-500/50">
               <Lock size={20} />
