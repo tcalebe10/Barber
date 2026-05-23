@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { ArrowLeft, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -21,6 +22,8 @@ export function SignUpForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState(""); // Novo campo
+  const [phone, setPhone] = useState(""); // Novo campo
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -34,23 +37,49 @@ export function SignUpForm({
     setError(null);
 
     if (password !== repeatPassword) {
-      setError("Passwords do not match");
+      setError("As senhas não coincidem");
       setIsLoading(false);
       return;
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // 1. Criar usuário no Auth do Supabase
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/protected`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
-      if (error) throw error;
-      router.push("/auth/sign-up-success");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+
+      if (authError) throw authError;
+
+      // 2. Salvar Nome e Telefone usando UPSERT
+      // O upsert evita o erro de "duplicate key" pois ele atualiza se já existir
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .upsert({
+            id: authData.user.id,
+            full_name: fullName,
+            phone: phone,
+            Email: email,
+            role: "client",
+          }, { onConflict: 'id' });
+
+        if (profileError) throw profileError;
+      }
+
+      // 3. Sucesso!
+      router.push("/auth/login?message=Cadastro realizado! Verifique seu e-mail.");
+      
+    } catch (error: any) {
+      // Tratamento de erro amigável
+      if (error.message.includes("unique constraint")) {
+        setError("Este usuário já está cadastrado.");
+      } else {
+        setError(error.message || "Ocorreu um erro no cadastro");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -58,63 +87,112 @@ export function SignUpForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
+      <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-xl shadow-2xl overflow-hidden relative border-t-0">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-red-600" />
+        <CardHeader className="space-y-1 pt-8">
+          <div className="flex justify-between items-start mb-6">
+            <Link
+              href="/"
+              className="text-zinc-500 hover:text-white transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-wider bg-zinc-800/40 px-3 py-1.5 rounded-lg border border-zinc-700/50 hover:bg-zinc-800"
+            >
+              <ArrowLeft size={14} />
+              Início
+            </Link>
+            <div className="text-orange-500/50">
+              <Lock size={20} />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 mb-2">
+            <CardTitle className="text-xl font-bold text-white tracking-tight">Criar Conta</CardTitle>
+          </div>
+          <CardDescription className="text-zinc-500 text-sm">Preencha seus dados profissionais</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSignUp}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="repeat-password">Repeat Password</Label>
-                </div>
-                <Input
-                  id="repeat-password"
-                  type="password"
-                  required
-                  value={repeatPassword}
-                  onChange={(e) => setRepeatPassword(e.target.value)}
-                />
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating an account..." : "Sign up"}
-              </Button>
+
+        <CardContent className="grid gap-4 pb-8">
+          <form onSubmit={handleSignUp} className="space-y-4">
+            
+            {/* NOME COMPLETO */}
+            <div className="grid gap-2">
+              <Label htmlFor="fullName" className="text-zinc-400 text-[10px] uppercase font-black tracking-widest">Nome Completo</Label>
+              <Input
+                id="fullName"
+                placeholder="Ex: Carlos Barbeiro"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="bg-zinc-950/50 border-zinc-800 text-white focus-visible:ring-orange-500 h-12 rounded-xl"
+              />
             </div>
-            <div className="mt-4 text-center text-sm">
-              Already have an account?{" "}
-              <Link href="/auth/login" className="underline underline-offset-4">
-                Login
-              </Link>
+
+            {/* TELEFONE */}
+            <div className="grid gap-2">
+              <Label htmlFor="phone" className="text-zinc-400 text-[10px] uppercase font-black tracking-widest">Telefone / WhatsApp</Label>
+              <Input
+                id="phone"
+                placeholder="(11) 99999-9999"
+                required
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="bg-zinc-950/50 border-zinc-800 text-white focus-visible:ring-orange-500 h-12 rounded-xl"
+              />
             </div>
+
+            {/* EMAIL */}
+            <div className="grid gap-2">
+              <Label htmlFor="email" className="text-zinc-400 text-[10px] uppercase font-black tracking-widest">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@exemplo.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-zinc-950/50 border-zinc-800 text-white focus-visible:ring-orange-500 h-12 rounded-xl"
+              />
+            </div>
+
+            {/* SENHA */}
+            <div className="grid gap-2">
+              <Label htmlFor="password" className="text-zinc-400 text-[10px] uppercase font-black tracking-widest">Senha</Label>
+              <Input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-zinc-950/50 border-zinc-800 text-white focus-visible:ring-orange-500 h-12 rounded-xl"
+              />
+            </div>
+
+            {/* REPETIR SENHA */}
+            <div className="grid gap-2">
+              <Label htmlFor="repeat-password" className="text-zinc-400 text-[10px] uppercase font-black tracking-widest">Repetir Senha</Label>
+              <Input
+                id="repeat-password"
+                type="password"
+                required
+                value={repeatPassword}
+                onChange={(e) => setRepeatPassword(e.target.value)}
+                className="bg-zinc-950/50 border-zinc-800 text-white focus-visible:ring-orange-500 h-12 rounded-xl"
+              />
+            </div>
+
+            {error && (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-[11px] font-bold text-center">{error}</div>
+            )}
+
+            <Button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:opacity-90 text-white font-bold h-12 rounded-xl shadow-lg shadow-orange-500/10 transition-all active:scale-[0.98]" disabled={isLoading}>
+              {isLoading ? "Processando..." : "Criar Conta"}
+            </Button>
           </form>
         </CardContent>
       </Card>
+
+      <div className="text-center text-sm mt-2">
+        <span className="text-zinc-400">Já possui conta? </span>
+        <Link href="/auth/login" className="text-orange-500 font-bold underline underline-offset-2">Entrar</Link>
+      </div>
     </div>
   );
 }

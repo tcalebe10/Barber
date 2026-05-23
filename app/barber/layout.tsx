@@ -2,19 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Users, Settings, X, LogOut } from 'lucide-react';
+import { LayoutDashboard, Calendar, Scissors, Users, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function BarberLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
 
-  // Rotas do admin
+  // Rotas atualizadas com /barber
   const menuItems = [
-    { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-    { name: 'Barbeiros', href: '/admin/barbers', icon: Users },
-    { name: 'Configurações', href: '/admin/settings', icon: Settings },
+    { name: 'Dashboard', href: '/barber/dashboard', icon: LayoutDashboard },
+    { name: 'Agenda', href: '/barber/schedule', icon: Calendar },
+    { name: 'Serviços', href: '/barber/services', icon: Scissors },
+    { name: 'Clientes', href: '/barber/clients', icon: Users },
   ];
 
   async function handleLogout() {
@@ -32,7 +33,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Logo */}
           <div className="h-20 flex items-center justify-between px-6 border-b border-zinc-800/50">
             <h2 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-              BarberPro Admin
+              BarberPro
             </h2>
             <button className="text-zinc-500 hover:text-zinc-300">
               <X size={20} />
@@ -68,7 +69,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 w-full"
           >
-            <LogOut size={16} />
+            <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-bold border border-zinc-700">
+              N
+            </div>
             Sair
           </button>
         </div>

@@ -101,13 +101,11 @@ export default function ClientsPage() {
         <div className="bg-[#1e1e24] p-6 rounded-xl border border-zinc-800/50 relative overflow-hidden">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-zinc-500 text-xs font-medium uppercase mb-1">Ticket Médio</p>
-              <h2 className="text-3xl font-bold">
-                R$ {clients.length > 0 ? (clients.reduce((acc, c) => acc + c.totalSpent, 0) / clients.length).toFixed(2) : '0,00'}
-              </h2>
+              <p className="text-zinc-500 text-xs font-medium uppercase mb-1">Gasto Médio</p>
+              <h2 className="text-3xl font-bold">R$ 150</h2>
             </div>
             <div className="bg-green-500/10 p-2 rounded-lg text-green-500">
-              <span className="font-bold text-sm">R$</span>
+              <MoreVertical size={20} />
             </div>
           </div>
           <div className="mt-4 h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
@@ -116,70 +114,62 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      {/* FILTRO E TABELA */}
-      <div className="bg-[#1e1e24] rounded-xl border border-zinc-800/50 overflow-hidden">
-        <div className="p-6 border-b border-zinc-800/50 flex flex-col md:flex-row gap-4 justify-between items-center">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
-            <input 
-              type="text"
-              placeholder="Buscar cliente pelo nome..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#18181b] border border-zinc-800 rounded-lg pl-10 pr-4 py-2 text-sm outline-none focus:border-orange-500 transition-colors"
-            />
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          {loading ? (
-            <div className="flex justify-center py-20"><Loader2 className="animate-spin text-orange-500" /></div>
-          ) : (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="text-zinc-500 text-[11px] uppercase font-bold tracking-wider">
-                  <th className="px-6 py-4 border-b border-zinc-800/50">Cliente</th>
-                  <th className="px-6 py-4 border-b border-zinc-800/50">Atendimentos</th>
-                  <th className="px-6 py-4 border-b border-zinc-800/50">Última Visita</th>
-                  <th className="px-6 py-4 border-b border-zinc-800/50">Total Gasto</th>
-                  <th className="px-6 py-4 border-b border-zinc-800/50 text-right">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-800/50">
-                {filteredClients.map((client, idx) => (
-                  <tr key={idx} className="hover:bg-zinc-800/30 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-bold text-orange-500 border border-zinc-700 uppercase">
-                          {client.name.substring(0, 2)}
-                        </div>
-                        <span className="text-sm font-semibold text-zinc-200">{client.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-zinc-400">
-                      <span className="bg-zinc-800 px-2 py-1 rounded text-[10px] font-bold">
-                        {client.appointmentsCount}x
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-zinc-400">
-                      {new Date(client.lastVisit).toLocaleDateString('pt-BR')}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-bold text-white">
-                      R$ {client.totalSpent.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="text-zinc-500 hover:text-white transition-colors">
-                        <MoreVertical size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+      {/* BARRA DE BUSCA */}
+      <div className="mb-6 relative">
+        <Search className="absolute left-4 top-3 text-zinc-500" size={18} />
+        <input 
+          type="text" 
+          placeholder="Buscar cliente..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full bg-[#1e1e24] border border-zinc-800 rounded-lg pl-12 pr-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-orange-500 outline-none transition-colors"
+        />
       </div>
 
+      {/* TABELA DE CLIENTES */}
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="animate-spin text-orange-500" size={32} />
+        </div>
+      ) : (
+        <div className="bg-[#1e1e24] border border-zinc-800/50 rounded-xl overflow-hidden">
+          {filteredClients.length === 0 ? (
+            <div className="text-center py-12">
+              <Users className="mx-auto text-zinc-600 mb-3" size={32} />
+              <p className="text-zinc-400 text-sm">Nenhum cliente encontrado.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-[#18181b] border-b border-zinc-800">
+                  <tr>
+                    <th className="text-left px-6 py-4 text-xs font-semibold text-zinc-400">NOME</th>
+                    <th className="text-left px-6 py-4 text-xs font-semibold text-zinc-400">ÚLTIMA VISITA</th>
+                    <th className="text-left px-6 py-4 text-xs font-semibold text-zinc-400">VISITAS</th>
+                    <th className="text-left px-6 py-4 text-xs font-semibold text-zinc-400">GASTO TOTAL</th>
+                    <th className="text-center px-6 py-4 text-xs font-semibold text-zinc-400">AÇÕES</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800">
+                  {filteredClients.map((client) => (
+                    <tr key={client.name} className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-6 py-4 text-sm font-medium text-white">{client.name}</td>
+                      <td className="px-6 py-4 text-sm text-zinc-400">{new Date(client.lastVisit).toLocaleDateString('pt-BR')}</td>
+                      <td className="px-6 py-4 text-sm font-semibold text-orange-500">{client.appointmentsCount}x</td>
+                      <td className="px-6 py-4 text-sm font-medium text-white">R$ {client.totalSpent.toFixed(2)}</td>
+                      <td className="px-6 py-4 text-center">
+                        <button className="text-zinc-500 hover:text-orange-500 transition-colors">
+                          <MoreVertical size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

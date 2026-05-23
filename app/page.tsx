@@ -14,14 +14,22 @@ export default function HomePage() {
           <h1 className="text-xl font-bold tracking-wide">BarberPro</h1>
         </div>
         
-        {/* BOTÃO COM O CAMINHO CORRIGIDO: /auth/login */}
-        <Link 
-          href="/auth/login" 
-          className="flex items-center gap-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors bg-zinc-800/50 hover:bg-zinc-800 px-4 py-2 rounded-full border border-zinc-700/50"
-        >
-          <LogIn size={16} />
-          <span>Área do Barbeiro</span>
-        </Link>
+        {/* BOTÕES DE AUTENTICAÇÃO */}
+        <div className="flex items-center gap-3">
+          <Link 
+            href="/auth/login" 
+            className="flex items-center gap-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors bg-zinc-800/50 hover:bg-zinc-800 px-4 py-2 rounded-full border border-zinc-700/50"
+          >
+            <LogIn size={16} />
+            <span>Login</span>
+          </Link>
+          <Link 
+            href="/auth/sign-up" 
+            className="flex items-center gap-2 text-sm font-medium text-white transition-colors bg-gradient-to-r from-orange-500 to-red-600 hover:opacity-90 px-4 py-2 rounded-full border border-orange-500/50"
+          >
+            <span>Cadastro</span>
+          </Link>
+        </div>
       </nav>
 
       {/* HERO SECTION */}
@@ -67,7 +75,7 @@ export default function HomePage() {
         <div className="bg-[#1e1e24] p-8 rounded-2xl border border-zinc-800/50 text-center group hover:border-orange-500/30 transition-colors">
           <MapPin className="mx-auto text-orange-500 mb-4" size={32} />
           <h3 className="text-lg font-bold text-white mb-2">Localização</h3>
-          <p className="text-zinc-400 text-sm font-medium">Rua das Barbearias, 123<br/>Bairro Premium - Sua Cidade</p>
+          <p className="text-zinc-400 text-sm font-medium">Rua Santa Quitéria, 388<br/>Carlos Prates - Belo Horizonte</p>
         </div>
       </section>
 
